@@ -1,0 +1,37 @@
+networks:
+  Main_databases:
+    driver: bridge
+
+services:
+  MySQL_Main:
+    image: mysql:latest
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: globalm
+      MYSQL_DATABASE: rpa_databases
+    volumes:
+      - ./MainDB_data:/var/lib/mysql # MySQL_Main 데이터 저장
+    ports:
+      - "4407:3307"
+    networks:
+      - Main_databases
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  web:
+    networks:
+      - Main_databases
+    build:
+      context: .
+      dockerfile: Dockerfile  
+    command: python manage.py runserver 0.0.0.0:8000 --settings=RPA_config.settings
+    volumes:
+      - .:/code
+    ports:
+      - "8000:8000"
+    depends_on:
+     MySQL_Main:
+        condition: service_healthy

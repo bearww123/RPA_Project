@@ -7,6 +7,7 @@
 
 from pathlib import Path
 import pymysql
+import os
 
 # BASE_DIR / 'subdir'과 같이 프로젝트 내부에 경로를 빌드합니다.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -16,10 +17,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # 보안 - 프로덕션 키 [ ※ 비밀 유지 해야함 ]
 SECRET_KEY = "django-insecure-vog2eglb$oiut@2mddfjui#nv%s%unk+614(e+a)co7$g0e#c="
+
 # 보안 - 프로덕션 환경 [ ※ 디버그 환경에서 실행 불가 ]
 DEBUG = True
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = ['*']
+# ['127.0.0.1', 'localhost'] - 서버를 구축 시
 
 # 애플리케이션 정의
 INSTALLED_APPS = [
@@ -46,7 +48,7 @@ ROOT_URLCONF = "RPA_config.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [ os.path.join(BASE_DIR, 'RPA_app/RPA_templates') ],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -64,57 +66,46 @@ WSGI_APPLICATION = "RPA_config.wsgi.application"
 # MySQL_DB - [ DOCKER ]
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-pymysql.install_as_MySQLdb()
-
+pymysql.install_as_MySQLdb() # pymysql 라이브러리로 연결하기 위함
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'rpa_databases',
         'USER': 'root',
-        'PASSWORD': 'globalm',
-        'HOST': '192.168.219.110',
+        'PASSWORD': "globalm",
+        'HOST': 'Main',
+        'PORT': '3306',
+    },
+    'BackUp_DB': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'rpa_databases',
+        'USER': 'root',
+        'PASSWORD': "globalb",
+        'HOST': 'BackUp',
         'PORT': '3306',
     }
 }
 
-
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
-
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
-    },
+    { "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator", },
+    { "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator", },
+    { "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator", },
+    { "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator", },
 ]
-
-
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
-
-LANGUAGE_CODE = "en-us"
-
+LANGUAGE_CODE = "ko"
 TIME_ZONE = "UTC"
-
 USE_I18N = True
-
 USE_TZ = True
 
-
-# Static files (CSS, JavaScript, Images)
+# 정적 파일 (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
-
-STATIC_URL = "RPA_static/"
+STATIC_URL = "/RPA_static/"
+STATICFILES_DIRS = [ os.path.join(BASE_DIR, 'RPA_app/RPA_static') ]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
-
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"

@@ -1,11 +1,15 @@
+# DOCKER 네트워크 연결
 networks:
-  Main_databases:
+  databases:
     driver: bridge
 
+# DOCKER 컨테이너 연결
 services:
-  MySQL_Main:
+  # Main_Database - [ MySQL ]
+  Main:
     image: mysql:latest
     restart: always
+    container_name: Main_DB
     environment:
       MYSQL_ROOT_PASSWORD: globalm
       MYSQL_DATABASE: rpa_databases
@@ -14,16 +18,36 @@ services:
     ports:
       - "4407:3307"
     networks:
-      - Main_databases
+      - databases
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 30s
       timeout: 10s
       retries: 5
-
+  # BackUp_Database - [ MySQL ]
+  BackUp:
+    image: mysql:latest
+    restart: always
+    container_name: BackUp_DB
+    environment:
+      MYSQL_ROOT_PASSWORD: globalb
+      MYSQL_DATABASE: Back_rpa_databases
+    volumes:
+      - ./BackDB_data:/var/lib/mysql #MySQL_Back 데이터 저장
+    ports:
+      - "4408:3308"
+    networks:
+      - databases
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+  # Main_Web - [ Django ]
   web:
     networks:
-      - Main_databases
+      - databases
+    container_name: RPA_Web
     build:
       context: .
       dockerfile: Dockerfile  
@@ -33,5 +57,5 @@ services:
     ports:
       - "8000:8000"
     depends_on:
-     MySQL_Main:
+     Main:
         condition: service_healthy
